@@ -78,14 +78,16 @@ node *pushLeafToNode (node *Node, elem_t element);
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-/// @brief Dumps tree. (Shell for simpleDumpFunction())
+/// @brief Dumps tree in htm file. (Shell for dumpFunction())
 /// @param Tree Pointer to tree.
-/// @param file Pointer to file. If you haven't enter it uses stdout.
-#define simpleTreeDump(Tree, file) \
-    simpleTreeDumpFunction(Tree, #Tree, __FILE__, __LINE__, __PRETTY_FUNCTION__, file)
+/// @param file Pointer to file.
+#define treeDump(Tree, message, file) \
+    treeDumpFunction(Tree, message, #Tree, __FILE__, __LINE__, __PRETTY_FUNCTION__, file)
 
-ISERROR simpleTreeDumpFunction (const tree *Tree, const char *treename, const char *filename, 
-                                const int   line, const char *function, FILE *file = stdout);
+ISERROR treeDumpFunction (const tree *Tree,     const char *message,
+                          const char *treename, const char *filename, 
+                          const int   line,     const char *function, 
+                          FILE *file);
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

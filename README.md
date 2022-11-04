@@ -1,5 +1,5 @@
 # Akinator
-Tries to guess what you guessed.
+Simple fun program on tree, tries to guess what you guessed.
 
 # Tree
 For average wood enjoyers.
@@ -40,9 +40,14 @@ First clone repo:
 ```
 git clone "https://github.com/flopsreallygotit/Tree.git"
 ```
-Then switch to Tree/Example/ and write:
+For example switch to Tree/Example/ and write:
 ```
 make
 ./main
 ```
-Good job! Now you can watch an example and then use it!
+
+To play in akinator switch to Tree/Akinator/ and write:
+```
+make
+./main
+```

@@ -318,21 +318,21 @@ static void elementOutput (const void *element,  FILE *file)
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#define printNode(Node, file)                                                \
-    do                                                                       \
-    {                                                                        \
-        fprintf(file, BOLD "    Node  pointer: " RESET "%p\n", Node);        \
-        fprintf(file, BOLD "    Left  pointer: " RESET "%p\n", Node->left);  \
-        fprintf(file, BOLD "    Right pointer: " RESET "%p\n", Node->right); \
-        fprintf(file, BOLD "    Element: " RESET);                           \
-        elementOutput(Node->data, file);                                     \
-        fprintf(file, "\n\n");                                               \
-    }                                                                        \
+#define PRINTNODE(Node, file)                                     \
+    do                                                            \
+    {                                                             \
+        fprintf(file, "    Node  pointer: " "%p\n", Node);        \
+        fprintf(file, "    Left  pointer: " "%p\n", Node->left);  \
+        fprintf(file, "    Right pointer: " "%p\n", Node->right); \
+        fprintf(file, "    Element: ");                           \
+        elementOutput(Node->data, file);                          \
+        fprintf(file, "\n\n");                                    \
+    }                                                             \
     while (0)
 
 static void printTree (const node *Node, FILE *file)
 {
-    printNode(Node, file);
+    PRINTNODE(Node, file);
 
     if (Node->left  != NULL)
         printTree(Node->left,  file);
@@ -345,8 +345,8 @@ static void printTree (const node *Node, FILE *file)
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-ISERROR simpleTreeDumpFunction (const tree *Tree, const char *treename, const char *filename, 
-                                const int   line, const char *function, FILE *file)
+static ISERROR simpleTreeDumpFunction (const tree *Tree, const char *treename, const char *filename, 
+                                       const int   line, const char *function, FILE *file)
 {
     CHECKERROR(Tree     != NULL && 
                "Can't dump nullpointer.", 
@@ -364,30 +364,35 @@ ISERROR simpleTreeDumpFunction (const tree *Tree, const char *treename, const ch
                "Can't dump with nullpointer to function.", 
                NULLPOINTER);
 
+    CHECKERROR(file     != NULL &&
+               "Can't dump with nullpointer to file.", 
+               NULLPOINTER);
+
     ISERROR treeError = treeVerifier(Tree);
 
-    fprintf(file, BOLD MAGENTA "\nTree dump at %s:%d in %s\n" RESET BOLD "Tree %s[%p] " RESET, 
+    fprintf(file, HTMLBLUE "\nTree dump at %s:%d in %s\n" HTMLRESET 
+            HTMLBOLD "Tree %s[%p] " HTMLBOLDRESET, 
             filename, line, function, treename, Tree);
 
     if (treeError == NOTERROR)
-        fprintf(file, BOLD GREEN "(OK)\n" RESET);
+        fprintf(file, HTMLGREEN "(OK)\n" HTMLRESET);
 
     else
-        fprintf(file, BOLD RED "(ERROR: %d)\n" RESET, (int) treeError);
+        fprintf(file, HTMLRED "(ERROR: %d)\n" HTMLRESET, (int) treeError);
 
     #ifdef BIRTHINFO
 
-    fprintf(file, BOLD "Birth at %s:%ld\n" RESET, Tree->birthFile, Tree->birthLine);
+    fprintf(file, HTMLBOLD "Birth at %s:%ld\n" HTMLBOLDRESET, Tree->birthFile, Tree->birthLine);
 
     #endif
 
-    printf("{\n");
+    fprintf(file, "{\n");
 
     #ifdef STRUCTCANARY
 
-    fprintf(file, BOLD "    Left  struct canary: %llx %s\n    Right struct canary: %llx %s\n" RESET, 
-            Tree->leftCanary,  (treeError == LEFTCANARY  ? RED "(DEAD)" RESET BOLD : GREEN "(OK)" RESET BOLD), 
-            Tree->rightCanary, (treeError == RIGHTCANARY ? RED "(DEAD)" RESET      : GREEN "(OK)" RESET     ));
+    fprintf(file, "    Left  struct canary: %llx %s\n    Right struct canary: %llx %s\n", 
+            Tree->leftCanary,  (treeError == LEFTCANARY  ? "(DEAD)" : "(OK)"), 
+            Tree->rightCanary, (treeError == RIGHTCANARY ? "(DEAD)" : "(OK)"));
 
     #endif
 
@@ -402,6 +407,138 @@ ISERROR simpleTreeDumpFunction (const tree *Tree, const char *treename, const ch
     fprintf(file, "}\n\n");
 
     return NOTERROR;
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+// Only address of current node or it's parent allow us to distinguish them.
+// So I use address for this.
+
+#define DEFINENODE(NodeParent, Node, tmp)                                              \
+    do                                                                                 \
+    {                                                                                  \
+        if (Node != NULL)                                                              \
+        {                                                                              \
+            fprintf(tmp, "    node%p [shape=box3d, style=\"filled\" fillcolor=\"%s\"," \
+                    "fontname=\"Arial\", label = ",                                    \
+                    Node, fillColor);                                                  \
+            elementOutput(Node->data, tmp);                                            \
+            fprintf(tmp, "]\n");                                                       \
+            fprintf(tmp, "    node%p -> node%p\n", NodeParent, Node);                  \
+        }                                                                              \
+    }                                                                                  \
+    while (0)
+
+static void recursiveFileFiller (const node *Node, FILE *tmp)
+{
+    DEFINENODE(Node, Node->left,  tmp);
+    DEFINENODE(Node, Node->right, tmp);
+
+    if (Node->left  != NULL)
+        recursiveFileFiller(Node->left,  tmp);
+
+    if (Node->right != NULL)
+        recursiveFileFiller(Node->right, tmp);
+    
+    return;
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+static void fillTemporaryFile (const tree *Tree, FILE *tmp)
+{
+    fprintf(tmp, 
+        "digraph BST\n{\n"
+        "    node%p [shape=point];\n", Tree->root);
+
+    recursiveFileFiller(Tree->root, tmp);
+
+    putc('}', tmp);  
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+// Html output need sources of images.
+// => We need to save all dump images.
+// => We need a number of current image:
+static int dumpNumber = 0;
+
+static ISERROR makeSourcesImages(void)
+{
+    char *command = (char *) calloc (maxCommandSize, sizeof(char));
+
+    CHECKERROR(command != NULL &&
+               "Can't allocate memory for command.",
+               ALLOCATIONERROR);
+
+    snprintf(command, maxCommandSize, "mkdir -p %s", dumpDirectory);
+    system(command);
+
+    snprintf(command, maxCommandSize, "dot %s -T png -o %sgraph%d.png", 
+             tmpFilename, dumpDirectory, dumpNumber);
+    system(command);
+
+    free(command);
+
+    return NOTERROR;
+}
+
+ISERROR treeDumpFunction (const tree *Tree,     const char *message,
+                          const char *treename, const char *filename, 
+                          const int   line,     const char *function, 
+                          FILE *file)
+{
+    CHECKERROR(Tree     != NULL && 
+               "Can't dump nullpointer.", 
+               NULLPOINTER);
+
+    CHECKERROR(message  != NULL && 
+               "Can't dump with nullpointer to message.", 
+               NULLPOINTER);
+
+    CHECKERROR(treename != NULL &&
+               "Can't dump with nullpointer to treename.",
+               NULLPOINTER);
+
+    CHECKERROR(filename != NULL &&
+               "Can't dump with nullpointer to filename.",
+               NULLPOINTER);
+
+    CHECKERROR(function != NULL &&
+               "Can't dump with nullpointer to function.", 
+               NULLPOINTER);
+
+    CHECKERROR(file     != NULL &&
+               "Can't dump with nullpointer to file.", 
+               NULLPOINTER);
+
+    fprintf(file, 
+            "\n<hr>\n<pre>\n"
+            "<h2>%s</h2>\n"
+            VERDANA, 
+            message);
+
+    ISERROR treeError = simpleTreeDumpFunction(Tree, treename, filename,
+                                               line, function, file);
+    fprintf(file, "</p>\n");
+
+    FILE *tmp = fopen(tmpFilename, "w");
+
+    CHECKERROR(tmp != NULL &&
+               "Can't open temporary file for graph dump.",
+               ALLOCATIONERROR);
+
+    fillTemporaryFile(Tree, tmp);
+    fclose(tmp);
+
+    CHECKERROR(makeSourcesImages() == NOTERROR, ERROR);
+
+    fprintf(file, "<img src = %sgraph%d.png>\n", dumpDirectory, dumpNumber);
+    dumpNumber++;
+
+    fprintf(file, "</hr>\n</pre>\n");
+
+    return treeError;
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -16,6 +16,16 @@ int main ()
 
     node *twelvePointer = treeInsert(Tree1, 12);
 
+    // File info dumps in.
+    // Better use "a" permission to complete 2 or more dumps.
+
+    // Dumps info about tree with pointers.
+
+    // Better use macro for dumps for correct information display.
+
+    FILE *output = fopen("output.htm", "a");
+    treeDump(Tree1, "Dump after twelve insert.", output);
+
     // Inserts element in subtree with root 12.
 
     // ...
@@ -46,9 +56,13 @@ int main ()
 
     pushLeafToNode(twelvePointer, 0);
 
-    // Dumps info about tree with pointers.
+    // One more dump.
 
-    simpleTreeDump(Tree1, stdout);
+    treeDump(Tree1, "Dump after twelve subtree insert.", output);
+
+    // Don't forget to close output file :-)
+
+    fclose(output);
 
     // Destructs tree.
     
