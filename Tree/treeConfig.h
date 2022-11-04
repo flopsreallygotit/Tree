@@ -27,37 +27,30 @@ typedef unsigned long long canary_t;
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-enum PUSHMODE
-{
-    LEFT  = 0,
-    RIGHT = 1,
-};
-
-/// @brief Sets default push direction to tree.
-PUSHMODE pushMode = LEFT;
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-const elem_t rootPoison = 0xEDA3802;
+/// @brief Value of root data.
+const elem_t rootPoison = 0; 
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #ifdef STRUCTCANARY
 
+/// @brief Value of left struct canary.
 const canary_t Canary1 = 0xAB0BAAB0BA;
+
+/// @brief Value of right struct canary.
 const canary_t Canary2 = 0xBEB7ABEB7A;
 
 #endif
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-/// @brief Node struct.
-struct node_;
-typedef struct node_ node;
-
 /// @brief Tree struct.
 struct tree_;
 typedef struct tree_ tree;
+
+/// @brief Node struct.
+struct node_;
+typedef struct node_ node;
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

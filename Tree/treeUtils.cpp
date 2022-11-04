@@ -144,7 +144,6 @@ static void recursiveTreeDestroyer (node *Node)
 void treeDestructor (tree *Tree)
 {
     CHECKERROR(Tree != NULL && "You are trying to destroy nullpointer.", (void) NULL);
-    CHECKERROR(treeVerifier(Tree) == NOTERROR && "Tree is wrong.",       (void) NULL);
 
     recursiveTreeDestroyer(Tree->root);
 
@@ -156,31 +155,35 @@ void treeDestructor (tree *Tree)
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#define CREATENODEANDEXIT(Node, element)           \
-    do                                             \
-    {                                              \
-        Node = nodeConstructor(element);           \
-        CHECKERROR(Node != NULL, ALLOCATIONERROR); \
-        return NOTERROR;                           \
-    }                                              \
+node *treeRoot (tree *Tree)
+{
+    CHECKERROR(Tree != NULL &&
+               "Can't execute root of nullpointer.", 
+               NULL);
+
+    return Tree->root;
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#define CREATENODEANDEXIT(Node, element) \
+    do                                   \
+    {                                    \
+        Node = nodeConstructor(element); \
+        return Node;                     \
+    }                                    \
     while (0)
     
-static ISERROR recursiveTreePusher (node *Node, elem_t element)
+static node *recursiveTreePusher (node *Node, elem_t element)
 {
     if (Node->left == NULL && Node->right == NULL) // We find a leaf.
     {
-        // If default push mode is set to left than create new node on Node->left, else on Node->right.
+        // Default push to left.
 
-        if (pushMode == LEFT)
-            CREATENODEANDEXIT(Node->left,  element);
-
-        else
-            CREATENODEANDEXIT(Node->right, element);
-
-        return NOTERROR;
+        CREATENODEANDEXIT(Node->left,  element);
     }
 
-    else if (Node->left != NULL) // && Node->right == NULL.
+    else if (Node->left  != NULL && Node->right == NULL)
     {
         // 1) If element < Node->left->data, recursion to Node->left.
         // 2) Else create new node on Node->right.
@@ -192,7 +195,7 @@ static ISERROR recursiveTreePusher (node *Node, elem_t element)
             CREATENODEANDEXIT(Node->right, element);
     }
 
-    else if (Node->right != NULL) // && Node->left == NULL.
+    else if (Node->right != NULL && Node->left  == NULL)
     {
         // 1) If element > Node->right->data, recursion to Node->right.
         // 2) Else create new node on Node->left.
@@ -204,59 +207,56 @@ static ISERROR recursiveTreePusher (node *Node, elem_t element)
             CREATENODEANDEXIT(Node->left, element);
     }
 
-    else // Node->left != NULL && Node->right != NULL.
+    else // Node->left != NULL && Node->right != NULL
     {
         // 1) If element > Node->left->data, recursion to Node->right.
         // 2) Else recursion to Node->left.
 
         if (element > Node->left->data)
             return recursiveTreePusher(Node->right, element);
+
         else
             return recursiveTreePusher(Node->left,  element);
     }
 
-    return NOTERROR;
+    return NULL;
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-// ISERROR pushLeafToNode (node *Node, elem_t element)
-// {
-//     CHECKERROR(Node != NULL && 
-//                "You are trying to push in nullpointer.", 
-//                NULLPOINTER);
-
-//     CHECKERROR(isfinite(element) && 
-//                "You are trying to insert not finite value in tree. It's not allowed", 
-//                ISNOTFINITE);
-
-//     recursiveTreePusher(Node, element);
-
-//     return NOTERROR;
-// }
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-ISERROR treeInsert (tree *Tree, elem_t element)
+node *treeInsert (tree *Tree, elem_t element)
 {
     CHECKERROR(Tree != NULL && 
                "You are trying to insert in nullpointer.", 
-               NULLPOINTER);
+               NULL);
 
     CHECKERROR(isfinite(element) && 
                "You are trying to insert not finite value in tree. It's not allowed.", 
-               ISNOTFINITE);
+               NULL);
 
-    recursiveTreePusher(Tree->root, element);
+    return recursiveTreePusher(Tree->root, element);
+}
 
-    return NOTERROR;
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+node *pushLeafToNode (node *Node, elem_t element)
+{
+    CHECKERROR(Node != NULL && 
+               "You are trying to push in nullpointer.", 
+               NULL);
+
+    CHECKERROR(isfinite(element) && 
+               "You are trying to insert not finite value in tree. It's not allowed", 
+               NULL);
+
+    return recursiveTreePusher(Node, element);
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 // Functions for output for element of type elem_t.
 // We don't know type of element (because it's typedef);
-// We don't know printf specifier;
+// We don't know printf specificator;
 // That's why we need function overload.
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -307,35 +307,38 @@ static void elementOutput (const short element,  FILE *file)
 
 // If required specificator not found, element outputs in hex.
 
-static void elementOutput (const void *element) 
+static void elementOutput (const void *element,  FILE *file) 
 {
     const elem_t Element = *(const elem_t *) element;
 
-    printf("%x", Element);
+    fprintf(file, "%x", Element);
 
     return;
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+#define printNode(Node, file)                                                \
+    do                                                                       \
+    {                                                                        \
+        fprintf(file, BOLD "    Node  pointer: " RESET "%p\n", Node);        \
+        fprintf(file, BOLD "    Left  pointer: " RESET "%p\n", Node->left);  \
+        fprintf(file, BOLD "    Right pointer: " RESET "%p\n", Node->right); \
+        fprintf(file, BOLD "    Element: " RESET);                           \
+        elementOutput(Node->data, file);                                     \
+        fprintf(file, "\n\n");                                               \
+    }                                                                        \
+    while (0)
+
 static void printTree (const node *Node, FILE *file)
 {
-    if (Node->left  != NULL)
-    {
-        putc('(', file);
-        return printTree(Node->left,  file);
-        putc(')', file);
-    }
+    printNode(Node, file);
 
-    elementOutput(Node->data, file);
-    putc(' ', file);
+    if (Node->left  != NULL)
+        printTree(Node->left,  file);
 
     if (Node->right != NULL)
-    {
-        putc('(', file);
-        return printTree(Node->right, file);
-        putc(')', file);
-    }
+        printTree(Node->right, file);
 
     return;
 }
@@ -388,44 +391,17 @@ ISERROR simpleTreeDumpFunction (const tree *Tree, const char *treename, const ch
 
     #endif
 
-    if (Tree->root)
-    {
-        fprintf(file, BOLD "    Print of tree:\n    " RESET);
+    putc('\n', file);
 
+    if (Tree->root)
         printTree(Tree->root, file);
 
-        putc(')', file);
-    }
-
     else
-        fprintf(file, "    Tree hasn't root.");
+        fprintf(file, "    Tree hasn't root.\n");
 
-    fprintf(file, "\n}\n\n");
+    fprintf(file, "}\n\n");
 
     return NOTERROR;
-}
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-// TODO remove
-// TODO recursive printTree
-
-int main ()
-{
-    tree Tree2 = {0};
-    simpleTreeDump(&Tree2, stdout);
-
-    tree *Tree1 = treeConstructor;
-    simpleTreeDump(Tree1, stdout);
-
-    treeInsert(Tree1, 10);
-    treeInsert(Tree1, 11);
-
-    simpleTreeDump(Tree1, stdout);
-
-    treeDestructor(Tree1);
-
-    return 0;
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

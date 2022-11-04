@@ -48,7 +48,7 @@ enum ISERROR
 /// @param Tree Pointer to tree.
 /// @param filename File where tree was created.
 /// @param line Line where tree was created.
-tree *treeConstructorFunction (const char *filename, size_t line);
+tree *treeConstructorFunction (const char *filename, int line);
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -58,10 +58,23 @@ void treeDestructor (tree *Tree);
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+/// @brief Returns pointer to tree root.
+/// @param Tree Pointer to tree struct.
+node *treeRoot (tree *Tree);
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 /// @brief Inserts element in tree.
 /// @param Tree Pointer to tree.
 /// @param element Element.
-ISERROR treeInsert (tree *Tree, elem_t element);
+node *treeInsert (tree *Tree, elem_t element);
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+/// @brief Pushes new leaf to subtree.
+/// @param Node Pointer to node (subtree).
+/// @param element Element.
+node *pushLeafToNode (node *Node, elem_t element);
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
