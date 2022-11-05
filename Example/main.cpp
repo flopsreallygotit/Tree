@@ -60,7 +60,7 @@ int main ()
 
     treeDump(Tree1, "Dump after twelve subtree insert.", output);
 
-    // Don't forget to close output file :-)
+    // Don't forget to close output :-)
 
     fclose(output);
 

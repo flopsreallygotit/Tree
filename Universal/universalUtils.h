@@ -36,10 +36,54 @@
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+enum ISERROR
+{
+    /// @brief Shows that function fulfilled without errors.
+    NOTERROR         = 0,
+
+    /// @brief Pointer is NULL.
+    NULLPOINTER      = 1,
+
+    /// @brief Left struct canary died.
+    LEFTCANARY       = 2,
+
+    /// @brief Right struct canary died.
+    RIGHTCANARY      = 3,
+
+    /// @brief Tree is wrong.
+    WRONGTREE        = 4,
+
+    /// @brief Tree size is wrong or capacity is bigger than maxSize.
+    WRONGSIZE        = 5,
+
+    /// @brief General error.
+    ERROR            = 6,
+
+    /// @brief Error in memory allocation.
+    ALLOCATIONERROR  = 7,
+
+    /// @brief File content is wrong.
+    FILECONTENTERROR = 8,
+};
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 /// @brief Puts warning in stderr.
 #define PUTWARNING(warning)                                                                \
     fprintf(stderr, BOLD YELLOW "Warning in file %s:%d line in function: %s! %s;\n" RESET, \
             __FILE__, __LINE__, __PRETTY_FUNCTION__, warning)                              \
+
+/// @brief Puts warning if condition is false.
+/// @param condition Condition that you need to check.
+#define CHECKWARNING(condition)     \
+    do                              \
+    {                               \
+        if (!(condition))           \
+            PUTWARNING(#condition); \
+    }                               \
+    while (0)
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 /// @brief Puts error in stderr.
 #define PUTERROR(error)                                                               \
@@ -59,6 +103,8 @@
         }                            \
     }                                \
     while (0)
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 /// @brief Check that function returned NOTERROR (Zero / false) value and returns -1 if it false.
 #define DOTHIS(value)                        \

