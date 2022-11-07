@@ -2,6 +2,10 @@
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+// Warning: FIRST SWITCH elem_t to int in treeConfig.h
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 int main ()
 {
     // Constructs tree.
@@ -33,14 +37,14 @@ int main ()
     // / \
     //-1  NULL
 
-    node *minusPointer = pushLeafToNode(twelvePointer, -1);
+    node *minusPointer = pushLeafToNode(Tree1, twelvePointer, -1);
 
     // ...
     //  12
     // / \
     //-1  1
 
-    node *onePointer   = pushLeafToNode(twelvePointer,  1);
+    node *onePointer   = pushLeafToNode(Tree1, twelvePointer,  1);
 
     // You can also use insert without saving it return value.
 
@@ -54,7 +58,7 @@ int main ()
     //    |
     //    0
 
-    pushLeafToNode(twelvePointer, 0);
+    pushLeafToNode(Tree1, twelvePointer, 0);
 
     // One more dump.
 
