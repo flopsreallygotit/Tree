@@ -29,6 +29,9 @@ const char *simpleCommandLineParser (const int argc, const char *argv[])
 
 static void skipBadSymbols (const char *buffer, size_t *idx)
 {
+    if (strictBaseSyntax)
+        return;
+
     while (buffer[*idx] != '{' && buffer[*idx] != '"' && 
            buffer[*idx] != '}' && buffer[*idx] != '\0')
         (*idx)++;
@@ -36,43 +39,66 @@ static void skipBadSymbols (const char *buffer, size_t *idx)
     return;
 }
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+static ISERROR getToQuestion (const char *buffer, size_t *idx)
+{
+    skipBadSymbols(buffer, idx);
+
+    CHECKERROR(buffer[*idx] == '{' &&
+                "Uncorrect bracket sequence.",
+                FILECONTENTERROR);
+    
+    (*idx)++; // Skipping '{'
+
+    skipBadSymbols(buffer, idx);   
+
+    CHECKERROR(buffer[*idx] == '"' &&
+                "Uncorrect quotes sequence.",
+                FILECONTENTERROR); 
+
+    return NOTERROR;
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+//TODO %ml[^()] 
+
 static ISERROR bufferParser (node *Node, const char *buffer)
 {
-    // First we need to process tree root.
-    // Then we will parse buffer recursively.
-
-    // We need to find first "word" and move pointer.
-    // Then we need to remove close bracket for this "word".
-
-    // I'll do it like this:
-    // 1) Skip all bad symbols from '\0' to '}'
-    // 2) Change '}' to '\0'
-
-    // Done we have buffer with subtrees: "{...}(maybe bad symbol e.t.c)...{...}"
-
     size_t idx = 0;
     while (buffer[idx] != '\0')
     {
-        skipBadSymbols(buffer, &idx);
-
-        CHECKERROR(buffer[idx] == '{' &&
-                   "Uncorrect bracket sequence.",
-                   FILECONTENTERROR);
+        CHECKERROR(getToQuestion(buffer, &idx) == NOTERROR, ERROR);
+        // scanString(buffer + idx); // I'm skipping second '"' here.
+        // pushNode();
+        // skipBadSymbols(buffer, &idx);
     }
 
     return;
 }
 
-static ISERROR parseFile (tree *Tree, FILE *file)
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+static size_t symbolsCounter (FILE *file)
 {
     struct stat fileStatBuffer;
 
     fstat(fileno(file), &fileStatBuffer);
 
-    size_t symbolsCount = fileStatBuffer.st_size; //TODO call func from onegin //TODO fix TODO highlighting
+    size_t symbolsCount = (size_t) fileStatBuffer.st_size;
+
+    return symbolsCount;
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+static ISERROR parseFile (tree *Tree, FILE *file)
+{
+    size_t symbolsCount = symbolsCounter(file);
 
     // I'm using symbolsCount + 1 as size, because we need '\0' at the end of buffer.
-    char *buffer = (char *) calloc (symbolsCount + 1, sizeof(char)); // TODO func from onegin
+    char *buffer = (char *) calloc (symbolsCount + 1, sizeof(char)); 
 
     CHECKERROR(buffer != NULL &&
                "Can't create buffer for file.",
@@ -86,6 +112,8 @@ static ISERROR parseFile (tree *Tree, FILE *file)
 
     return NOTERROR;
 }
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 tree *openAndParseFile (const char *filename)
 {
