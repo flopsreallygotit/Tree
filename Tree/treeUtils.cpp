@@ -13,6 +13,8 @@
 
 struct node_
 {
+    node_ *parent;
+
     node_ *left;
 
     elem_t data;
@@ -48,13 +50,14 @@ static ISERROR treeVerifier (const tree *Tree)
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-static node *nodeConstructor (elem_t element)
+static node *nodeConstructor (elem_t element, node *parent)
 {                                          
     node *Node = (node *) calloc (1, sizeof(node));
 
     CHECKERROR(Node != NULL && "Can't allocate memory for node.", NULL); 
 
-    Node->data  = element;
+    Node->parent = parent;
+    Node->data   = element;
 
     Node->left  = NULL;                                                   
     Node->right = NULL;
@@ -66,11 +69,11 @@ static node *nodeConstructor (elem_t element)
 
 tree *treeConstructorFunction (const char *filename, const int line) // TODO check consts
 {
-    tree *Tree = (tree *)   calloc (1, sizeof(tree));
+    tree *Tree = (tree *) calloc (1, sizeof(tree));
 
     CHECKERROR(Tree != NULL && "Can't allocate memory for tree.", NULL);
 
-    Tree->root = nodeConstructor(rootPoison);
+    Tree->root = nodeConstructor(rootPoison, NULL);
 
     CHECKERROR(Tree->root != NULL, NULL);
 
@@ -138,7 +141,7 @@ node *treeRootPush (tree *Tree, elem_t element)
                "Tree is wrong.",
                NULL);
 
-    CHECKWARNING(Tree->root->data != rootPoison &&
+    CHECKWARNING(Tree->root->data == rootPoison &&
                "Tree already contains data in root.");
 
     Tree->root->data = element;
@@ -162,7 +165,7 @@ node *pushLeftLeaf (tree *Tree, node *Node, elem_t element)
                "Can't push a value in left node, because it already contains it.",
                NULL);
 
-    Node->left = nodeConstructor(element);
+    Node->left = nodeConstructor(element, Node);
 
     return Node->left;
 }
@@ -183,19 +186,19 @@ node *pushRightLeaf (tree *Tree, node *Node, elem_t element)
                "Can't push a value in right node, because it already contains it.",
                NULL);
 
-    Node->right = nodeConstructor(element);
+    Node->right = nodeConstructor(element, Node);
 
     return Node->right;
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#define CREATENODEANDEXIT(Node, element) \
-    do                                   \
-    {                                    \
-        Node = nodeConstructor(element); \
-        return Node;                     \
-    }                                    \
+#define CREATENODEANDEXIT(Node, element, parent) \
+    do                                           \
+    {                                            \
+        Node = nodeConstructor(element, parent); \
+        return Node;                             \
+    }                                            \
     while (0)
     
 static node *recursiveTreePusher (node *Node, elem_t element)
@@ -204,7 +207,7 @@ static node *recursiveTreePusher (node *Node, elem_t element)
     {
         // Default push to left.
 
-        CREATENODEANDEXIT(Node->left,  element);
+        CREATENODEANDEXIT(Node->left, element, Node);
     }
 
     else if (Node->left  != NULL && Node->right == NULL)
@@ -216,7 +219,7 @@ static node *recursiveTreePusher (node *Node, elem_t element)
             return recursiveTreePusher(Node->left, element);
 
         else
-            CREATENODEANDEXIT(Node->right, element);
+            CREATENODEANDEXIT(Node->right, element, Node);
     }
 
     else if (Node->right != NULL && Node->left  == NULL)
@@ -228,7 +231,7 @@ static node *recursiveTreePusher (node *Node, elem_t element)
             return recursiveTreePusher(Node->right, element);
 
         else
-            CREATENODEANDEXIT(Node->left, element);
+            CREATENODEANDEXIT(Node->left, element, Node);
     }
 
     else // Node->left != NULL && Node->right != NULL
@@ -342,16 +345,17 @@ static void elementOutput (const void *element,  FILE *file)
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#define PRINTNODE(Node, file)                                     \
-    do                                                            \
-    {                                                             \
-        fprintf(file, "    Node  pointer: " "%p\n", Node);        \
-        fprintf(file, "    Left  pointer: " "%p\n", Node->left);  \
-        fprintf(file, "    Right pointer: " "%p\n", Node->right); \
-        fprintf(file, "    Element: ");                           \
-        elementOutput(Node->data, file);                          \
-        fprintf(file, "\n\n");                                    \
-    }                                                             \
+#define PRINTNODE(Node, file)                                       \
+    do                                                              \
+    {                                                               \
+        fprintf(file, "    Node   pointer: " "%p\n", Node);         \
+        fprintf(file, "    Parent pointer: " "%p\n", Node->parent); \
+        fprintf(file, "    Left   pointer: " "%p\n", Node->left);   \
+        fprintf(file, "    Right  pointer: " "%p\n", Node->right);  \
+        fprintf(file, "    Element: ");                             \
+        elementOutput(Node->data, file);                            \
+        fprintf(file, "\n\n");                                      \
+    }                                                               \
     while (0)
 
 static void printTree (const node *Node, FILE *file)
@@ -463,9 +467,22 @@ static void recursiveFileFiller (const node *Node, FILE *tmp)
 
 static void fillTemporaryFile (const tree *Tree, FILE *tmp)
 {
-    fprintf(tmp, 
-        "digraph BST\n{\n"
-        "    node%p [shape=point];\n", Tree->root);
+    if (Tree->root->data == rootPoison)
+        fprintf(tmp, 
+            "digraph BST\n{\n"
+            "    node%p [shape=point];\n", Tree->root);
+
+    else
+    {
+        fprintf(tmp, 
+            "digraph BST\n{\n"
+                "    node%p [shape=box3d, style=\"filled\" fillcolor=\"%s\","
+                "fontname=\"Arial\", label = ",
+                Tree->root, fillColor);
+        
+        elementOutput(Tree->root->data, tmp);
+        fprintf(tmp, "]\n");
+    }
 
     recursiveFileFiller(Tree->root, tmp);
 

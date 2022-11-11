@@ -62,7 +62,16 @@ static ISERROR getToQuestion (const char *buffer, size_t *idx)
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-//TODO %ml[^()] 
+static char *scanString (const char *string)
+{
+    char *newString = NULL;
+
+    sscanf(string, "%ms[^{}]", newString);
+
+    return newString;
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 static ISERROR bufferParser (node *Node, const char *buffer)
 {
@@ -70,12 +79,11 @@ static ISERROR bufferParser (node *Node, const char *buffer)
     while (buffer[idx] != '\0')
     {
         CHECKERROR(getToQuestion(buffer, &idx) == NOTERROR, ERROR);
-        // scanString(buffer + idx); // I'm skipping second '"' here.
-        // pushNode();
-        // skipBadSymbols(buffer, &idx);
+
+        char *newString = scanString(buffer + idx);
     }
 
-    return;
+    return NOTERROR;
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
