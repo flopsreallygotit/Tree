@@ -2,7 +2,9 @@
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-// Warning: FIRST SWITCH elem_t to int in treeConfig.h
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//! Warning: FIRST SWITCH elem_t to int in treeConfig.h !
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -34,14 +36,14 @@ int main ()
 
     // ...
     //  12
-    // / \
+    // /  \
     //-1  NULL
 
     node *minusPointer = pushLeafToNode(Tree1, twelvePointer, -1);
 
     // ...
     //  12
-    // / \
+    // /  \
     //-1  1
 
     node *onePointer   = pushLeafToNode(Tree1, twelvePointer,  1);
@@ -53,12 +55,16 @@ int main ()
 
     // ...
     //  12
-    // / \
+    // /  \
     //-1  1
     //    |
     //    0
 
     pushLeafToNode(Tree1, twelvePointer, 0);
+
+    // Root: rootPoison (default: 0) changes to 23.
+    
+    treeRootPush(Tree1, 23);
 
     // One more dump.
 
