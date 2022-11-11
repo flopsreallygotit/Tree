@@ -31,6 +31,10 @@ Inserts element in subtree (Pushes to node):
 ```
 pushLeafToNode(coolRoot, 2);
 ```
+Pushes element in root:
+```
+treeRootPush(myCoolTree, 12);
+```
 
 ## Dump
 Dumps info about tree in file:
