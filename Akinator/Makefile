@@ -17,7 +17,7 @@ DIRFLAGS = -I../Tree -I../Universal
 SOURCES = main.cpp akinatorUtils.cpp ../Tree/treeUtils.cpp ../Universal/universalUtils.cpp
 
 # Configure dependence headers.
-HEADERS = akinatorUtils.h ../Tree/treeUtils.h ../Universal/universalUtils.h akinatorConfig.h
+HEADERS = akinatorConfig.h akinatorUtils.h ../Tree/treeUtils.h ../Universal/universalUtils.h
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

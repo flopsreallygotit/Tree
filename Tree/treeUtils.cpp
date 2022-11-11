@@ -22,24 +22,12 @@ struct node_
 
 struct tree_
 {
-    #ifdef STRUCTCANARY
-
-    canary_t leftCanary; // *((char*) tree_ + 9) = 0 // TODO zachem?
-
-    #endif
-
     node *root;
 
     #ifdef BIRTHINFO
 
     size_t      birthLine;
     const char *birthFile;
-
-    #endif
-
-    #ifdef STRUCTCANARY
-
-    canary_t rightCanary;
 
     #endif
 }tree_;
@@ -54,24 +42,6 @@ static ISERROR treeVerifier (const tree *Tree)
 
         return WRONGTREE;
     }
-
-    #ifdef STRUCTCANARY
-
-    if (Tree->leftCanary  != Canary1)
-    {
-        PUTERROR("Left canary is dead");
-
-        return LEFTCANARY;
-    }
-
-    if (Tree->rightCanary != Canary2)
-    {
-        PUTERROR("Right canary is dead");
-
-        return RIGHTCANARY;
-    }
-
-    #endif
 
     return NOTERROR;
 }
@@ -94,7 +64,7 @@ static node *nodeConstructor (elem_t element)
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-tree *treeConstructorFunction (const char const *filename, const int line) // TODO check consts
+tree *treeConstructorFunction (const char *filename, const int line) // TODO check consts
 {
     tree *Tree = (tree *)   calloc (1, sizeof(tree));
 
@@ -108,13 +78,6 @@ tree *treeConstructorFunction (const char const *filename, const int line) // TO
 
     Tree->birthFile = filename;
     Tree->birthLine = line;
-
-    #endif
-
-    #ifdef STRUCTCANARY
-
-    Tree->leftCanary  = Canary1;
-    Tree->rightCanary = Canary2;
 
     #endif
 
@@ -171,13 +134,58 @@ node *treeRootPush (tree *Tree, elem_t element)
                "Can't push to nullpointer.", 
                NULL);
 
-    CHECKERROR(treeVerifier(Tree) == NOTERROR &&
+    CHECKERROR(treeVerifier(Tree) == NOTERROR   &&
                "Tree is wrong.",
                NULL);
+
+    CHECKWARNING(Tree->root->data != rootPoison &&
+               "Tree already contains data in root.");
 
     Tree->root->data = element;
 
     return Tree->root;
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+node *pushLeftLeaf (tree *Tree, node *Node, elem_t element)
+{
+    CHECKERROR(Tree != NULL &&
+               "Can't push to nullpointer.", 
+               NULL);
+
+    CHECKERROR(treeVerifier(Tree) == NOTERROR &&
+               "Tree is wrong.",
+               NULL);
+
+    CHECKERROR(Node->left == NULL &&
+               "Can't push a value in left node, because it already contains it.",
+               NULL);
+
+    Node->left = nodeConstructor(element);
+
+    return Node->left;
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+node *pushRightLeaf (tree *Tree, node *Node, elem_t element)
+{
+    CHECKERROR(Tree != NULL &&
+               "Can't push to nullpointer.", 
+               NULL);
+
+    CHECKERROR(treeVerifier(Tree) == NOTERROR &&
+               "Tree is wrong.",
+               NULL);
+
+    CHECKERROR(Node->right == NULL &&
+               "Can't push a value in right node, because it already contains it.",
+               NULL);
+
+    Node->right = nodeConstructor(element);
+
+    return Node->right;
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -247,7 +255,7 @@ node *treeInsert (tree *Tree, elem_t element)
                NULL);
 
     CHECKERROR(treeVerifier(Tree) == NOTERROR &&
-            "Tree is wrong.", // TODO DSL
+            "Tree is wrong.",
             NULL);
 
     return recursiveTreePusher(Tree->root, element);
@@ -404,14 +412,6 @@ static ISERROR simpleTreeDumpFunction (const tree *Tree, const char *treename, c
 
     fprintf(file, "{\n");
 
-    #ifdef STRUCTCANARY
-
-    fprintf(file, "    Left  struct canary: %llx %s\n    Right struct canary: %llx %s\n", 
-            Tree->leftCanary,  (treeError == LEFTCANARY  ? "(DEAD)" : "(OK)"), 
-            Tree->rightCanary, (treeError == RIGHTCANARY ? "(DEAD)" : "(OK)"));
-
-    #endif
-
     putc('\n', file);
 
     if (Tree->root)
@@ -487,11 +487,10 @@ static ISERROR makeSourcesImages(void)
                "Can't allocate memory for command.",
                ALLOCATIONERROR);
 
-    snprintf(command, maxCommandSize, "mkdir -p %s", dumpDirectory);
+    snprintf(command, maxCommandSize, "mkdir -p ./TreeDumpSources/");
     system(command);
 
-    snprintf(command, maxCommandSize, "dot %s -T png -o %sgraph%d.png", 
-             tmpFilename, dumpDirectory, dumpNumber);
+    snprintf(command, maxCommandSize, "dot tmp.txt -T png -o ./TreeDumpSources/graph%d.png", dumpNumber);
     system(command);
 
     free(command);
@@ -538,7 +537,7 @@ ISERROR treeDumpFunction (const tree *Tree,     const char *message,
                                                line, function, file);
     fprintf(file, "</p>\n");
 
-    FILE *tmp = fopen(tmpFilename, "w");
+    FILE *tmp = fopen("tmp.txt", "w");
 
     CHECKERROR(tmp != NULL &&
                "Can't open temporary file for graph dump.",
@@ -549,8 +548,10 @@ ISERROR treeDumpFunction (const tree *Tree,     const char *message,
 
     CHECKERROR(makeSourcesImages() == NOTERROR, ERROR);
 
-    fprintf(file, "<img src = %sgraph%d.png>\n", dumpDirectory, dumpNumber);
+    fprintf(file, "<img src = ./TreeDumpSources/graph%d.png>\n", dumpNumber);
     dumpNumber++;
+
+    system("rm -rf tmp.txt");
 
     fprintf(file, "</hr>\n</pre>\n");
 

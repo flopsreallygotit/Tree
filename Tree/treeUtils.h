@@ -39,6 +39,22 @@ node *treeRootPush (tree *Tree, elem_t element);
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+/// @brief Pushes element in left node of given subtree.
+/// @param Tree Pointer to tree.
+/// @param Node Pointer to node.
+/// @param element Element.
+node *pushLeftLeaf  (tree *Tree, node *Node, elem_t element);
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+/// @brief Pushes element in left node of given subtree.
+/// @param Tree Pointer to tree.
+/// @param Node Pointer to node.
+/// @param element Element.
+node *pushRightLeaf (tree *Tree, node *Node, elem_t element);
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 /// @brief Inserts element in tree.
 /// @param Tree Pointer to tree.
 /// @param element Element.
