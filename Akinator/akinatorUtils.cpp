@@ -29,96 +29,59 @@ const char *simpleCommandLineParser (const int argc, const char *argv[])
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-static void skipBadSymbols (const char *buffer, size_t *idx)
+static void skipBadSymbols (FILE *file)
 {
+    // We don't need to skip bad symbols if syntax is strict.
     if (strictBaseSyntax)
         return;
 
-    while (buffer[*idx] != '{' && buffer[*idx] != '"' && 
-           buffer[*idx] != '}' && buffer[*idx] != '\0')
-        (*idx)++;
+    int symbol = getc(file);
+    while (symbol != '{' && symbol != '"' && 
+           symbol != '}' && symbol != EOF)
+        symbol = getc(file);
+
+    ungetc(symbol, file); 
+    
+    // For example: we skipped all bad symbols, but last symbol from stream is '{', '}', '"'.
+    // So we need to put it back to stream.
 
     return;
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-static ISERROR getToQuestion (const char *buffer, size_t *idx)
-{
-    skipBadSymbols(buffer, idx);
-
-    CHECKERROR(buffer[*idx] == '{' &&
-                "Uncorrect bracket sequence.",
-                FILECONTENTERROR);
-    
-    (*idx)++; // Skipping '{'
-
-    skipBadSymbols(buffer, idx);   
-
-    CHECKERROR(buffer[*idx] == '"' &&
-                "Uncorrect quotes sequence.",
-                FILECONTENTERROR); 
-
-    return NOTERROR;
-}
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-static char *scanString (const char *string)
-{
-    char *newString = NULL;
-
-    sscanf(string, "%ms[^{}]", newString);
-
-    return newString;
-}
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-static ISERROR bufferParser (node *Node, const char *buffer)
-{
-    size_t idx = 0;
-    while (buffer[idx] != '\0')
-    {
-        CHECKERROR(getToQuestion(buffer, &idx) == NOTERROR, ERROR);
-
-        char *newString = scanString(buffer + idx);
-    }
-
-    return NOTERROR;
-}
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-static size_t symbolsCounter (FILE *file)
-{
-    struct stat fileStatBuffer;
-
-    fstat(fileno(file), &fileStatBuffer);
-
-    size_t symbolsCount = (size_t) fileStatBuffer.st_size;
-
-    return symbolsCount;
-}
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 static ISERROR parseFile (tree *Tree, FILE *file)
 {
-    size_t symbolsCount = symbolsCounter(file);
+    // First we need to initialize root of tree.
+    // Then we are parsing recursively.
 
-    // I'm using symbolsCount + 1 as size, because we need '\0' at the end of buffer.
-    char *buffer = (char *) calloc (symbolsCount + 1, sizeof(char)); 
+    skipBadSymbols(file);
 
-    CHECKERROR(buffer != NULL &&
-               "Can't create buffer for file.",
-               ALLOCATIONERROR);
+    int symbol = getc(file);
+    if ((char) symbol != '{')
+    {
+        PUTERROR("Uncorrect bracket sequence.");
 
-    fread(buffer, symbolsCount, symbolsCount, file);
+        treeDestructor(Tree);
+        fclose(file);
 
-    bufferParser(treeRoot(Tree), buffer);
+        return FILECONTENTERROR;
+    }
 
-    free(buffer);
+    else if (symbol == EOF)
+    {
+        PUTERROR("Empty data base.");
+
+        treeDestructor(Tree);
+        fclose(file);
+
+        return EMPTY;
+    }
+
+    else
+        ungetc('{', file);
+
+    fclose(file);
 
     return NOTERROR;
 }
@@ -143,9 +106,11 @@ tree *openAndParseFile (const char *filename)
                "Can't create tree.",
                NULL);
 
-    parseFile(Tree, file);
-
-    fclose(file);
+    // We have a guarantee that if parser have error, tree is destructed. 
+    // So we can return NULL if error has occured.
+    CHECKERROR(parseFile(Tree, file) == NOTERROR &&
+               "Wrong akinator data base.",
+               NULL);
 
     return Tree;
 }

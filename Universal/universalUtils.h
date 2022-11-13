@@ -44,26 +44,23 @@ enum ISERROR
     /// @brief Pointer is NULL.
     NULLPOINTER      = 1,
 
-    /// @brief Left struct canary died.
-    LEFTCANARY       = 2,
-
-    /// @brief Right struct canary died.
-    RIGHTCANARY      = 3,
-
     /// @brief Tree is wrong.
-    WRONGTREE        = 4,
+    WRONGTREE        = 2,
 
     /// @brief Tree size is wrong or capacity is bigger than maxSize.
-    WRONGSIZE        = 5,
+    WRONGSIZE        = 3,
 
     /// @brief General error.
-    ERROR            = 6,
+    ERROR            = 4,
 
     /// @brief Error in memory allocation.
-    ALLOCATIONERROR  = 7,
+    ALLOCATIONERROR  = 5,
 
     /// @brief File content is wrong.
-    FILECONTENTERROR = 8,
+    FILECONTENTERROR = 6,
+
+    /// @brief Something is empty.
+    EMPTY            = 7,
 };
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
