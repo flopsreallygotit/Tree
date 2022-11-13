@@ -12,6 +12,8 @@ static const bool strictBaseSyntax    = false;
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+// TODO Akinator Text-To-Speech mode.
+
 /// @brief If flag is true, akinator will voice all text.
 static const bool enableAkinatorVoice = true;
 

@@ -1,5 +1,6 @@
 # Akinator
 Simple fun program on tree, tries to guess what you guessed.
+Works only on Linux.
 
 # Tree
 Binary tree data structure.

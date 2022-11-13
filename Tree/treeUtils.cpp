@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <locale.h>
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -67,11 +68,13 @@ static node *nodeConstructor (elem_t element, node *parent)
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-tree *treeConstructorFunction (const char *filename, const int line) // TODO check consts
+tree *treeConstructorFunction (const char *filename, const int line)
 {
     tree *Tree = (tree *) calloc (1, sizeof(tree));
 
-    CHECKERROR(Tree != NULL && "Can't allocate memory for tree.", NULL);
+    CHECKERROR(Tree != NULL && 
+               "Can't allocate memory for tree.",
+               NULL);
 
     Tree->root = nodeConstructor(rootPoison, NULL);
 
@@ -108,7 +111,9 @@ static void recursiveTreeDestroyer (node *Node)
 
 void treeDestructor (tree *Tree)
 {
-    CHECKERROR(Tree != NULL && "You are trying to destroy nullpointer.", (void) NULL);
+    CHECKERROR(Tree != NULL && 
+               "You are trying to destroy nullpointer.", 
+               (void) NULL);
 
     recursiveTreeDestroyer(Tree->root);
 
@@ -142,7 +147,7 @@ node *treeRootPush (tree *Tree, elem_t element)
                NULL);
 
     CHECKWARNING(Tree->root->data == rootPoison &&
-               "Tree already contains data in root.");
+                 "Tree already contains data in root.");
 
     Tree->root->data = element;
 
@@ -288,59 +293,107 @@ node *pushLeafToNode (tree *Tree, node *Node, elem_t element)
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-static void elementOutput (const int element,    FILE *file)
+static void elementOutput (const int element,     FILE *file)
 {
     fprintf(file, "%d", element);
 
     return;
 }
 
-static void elementOutput (const double element, FILE *file)
+static void elementOutput (const double element,  FILE *file)
 {
     fprintf(file, "%lg", element);
 
     return;
 }
 
-static void elementOutput (const char *element,  FILE *file)
+static void elementOutput (const char *element,   FILE *file)
 {
-    fprintf(file, "%s", element);
+    printf("\tHERE\n");
+    if (element != NULL)
+        fprintf(file, "\"%s\"", element);
+    else
+        fprintf(file, "%s", element); // Seems strange, but i need (nil) in file, instead of "(nil)".
 
     return;
 }
 
-static void elementOutput (const char element,   FILE *file) 
+static void elementOutput (const char element,    FILE *file) 
 {
     fprintf(file, "%c", element);
 
     return;
 }
 
-static void elementOutput (const long element,   FILE *file)
+static void elementOutput (const long element,    FILE *file)
 {
     fprintf(file, "%ld", element);
 
     return;
 }
 
-static void elementOutput (const short element,  FILE *file) 
+static void elementOutput (const short element,   FILE *file) 
 {
     fprintf(file, "%hd", element);
 
     return;
 }
 
+static void elementOutput (const wchar_t *element, FILE *file) 
+{
+    if (element != NULL)
+        fprintf(file, "\"%ls\"", element);
+    else
+        fprintf(file, "%ls", element); // Seems strange, but i need (nil) in file, instead of "(nil)".
+}
+
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-// If required specificator not found, element outputs in hex.
+// If required specificator not found.
 
-static void elementOutput (const void *element,  FILE *file) 
+static void elementOutput (const void *element, FILE *file) 
 {
-    const elem_t Element = *(const elem_t *) element;
+    PUTWARNING("Unsupported type!");
 
-    fprintf(file, "%x", Element);
+    fprintf(file, "ERR");
 
     return;
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+static void recursivePreorderPrintTree (const node *Node, FILE *file)
+{
+    putc('{', file);
+
+    elementOutput(Node->data, file);
+
+    if (Node->left  != NULL)
+        recursivePreorderPrintTree(Node->left,  file);
+
+    if (Node->right != NULL)
+        recursivePreorderPrintTree(Node->right, file);
+
+    putc('}', file);
+
+    return;
+}
+
+ISERROR preorderPrintTree (tree *Tree, FILE *file)
+{
+    CHECKERROR(Tree != NULL &&
+               "Can't print nullpointer.",
+               NULLPOINTER);
+
+    CHECKERROR(treeVerifier(Tree) == NOTERROR &&
+               "Tree is wrong.",
+               WRONGTREE);
+
+    recursivePreorderPrintTree(Tree->root, file);
+
+    putc('\n', file);
+
+    return NOTERROR;
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -358,15 +411,16 @@ static void elementOutput (const void *element,  FILE *file)
     }                                                               \
     while (0)
 
-static void printTree (const node *Node, FILE *file)
+
+static void recursivePrintTree (const node *Node, FILE *file)
 {
     PRINTNODE(Node, file);
 
     if (Node->left  != NULL)
-        printTree(Node->left,  file);
+        recursivePrintTree(Node->left,  file);
 
     if (Node->right != NULL)
-        printTree(Node->right, file);
+        recursivePrintTree(Node->right, file);
 
     return;
 }
@@ -419,7 +473,7 @@ static ISERROR simpleTreeDumpFunction (const tree *Tree, const char *treename, c
     putc('\n', file);
 
     if (Tree->root)
-        printTree(Tree->root, file);
+        recursivePrintTree(Tree->root, file);
 
     else
         fprintf(file, "    Tree hasn't root.\n");
@@ -520,6 +574,8 @@ ISERROR treeDumpFunction (const tree *Tree,     const char *message,
                           const int   line,     const char *function, 
                           FILE *file)
 {
+    setlocale(LC_CTYPE, "");
+
     CHECKERROR(Tree     != NULL && 
                "Can't dump nullpointer.", 
                NULLPOINTER);

@@ -70,6 +70,13 @@ node *pushLeafToNode (tree *Tree, node *Node, elem_t element);
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+/// @brief Prints tree in pre-order.
+/// @param Tree Poiter to tree.
+/// @param file Pointer to file.
+ISERROR preorderPrintTree (tree *Tree, FILE *file = stdout);
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 /// @brief Dumps tree in htm file. (Shell for dumpFunction())
 /// @param Tree Pointer to tree.
 /// @param file Pointer to file.
