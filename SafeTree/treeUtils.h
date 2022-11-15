@@ -20,6 +20,13 @@ tree *treeConstructorFunction (const char *filename, int line);
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+/// @brief Constructs node.
+/// @param element Element.
+/// @param parent Parent of this node / previous node.
+node *nodeConstructor (elem_t element, node *parent);
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 /// @brief Destructs tree.
 /// @param tree Pointer to tree.
 void treeDestructor (tree *Tree);
@@ -28,30 +35,48 @@ void treeDestructor (tree *Tree);
 
 /// @brief Returns pointer to tree root.
 /// @param Tree Pointer to tree struct.
-node *treeRoot (tree *Tree);
+node *treeRoot    (tree *Tree);
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+/// @brief Returns pointer to pointer to node parent.
+/// @param Node Pointer to node.
+node *nodeParent (node *Node);
+
+/// @brief Returns pointer to pointer to left node.
+/// @param Node Pointer to node.
+node *leftNode   (node *Node);
+
+/// @brief Returns pointer to pointer to right node.
+/// @param Node Pointer to node.
+node *rightNode  (node *Node);
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+/// @brief Returns node data.
+/// @param Node Pointer to node.
+elem_t nodeData (node *Node);
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 /// @brief Pushes element in tree root.
 /// @param Tree Pointer to tree.
 /// @param element Element.
-node *treeRootPush (tree *Tree, elem_t element);
+node *insertRoot (tree *Tree, elem_t element);
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 /// @brief Pushes element in left node of given subtree.
-/// @param Tree Pointer to tree.
 /// @param Node Pointer to node.
 /// @param element Element.
-node *pushLeftLeaf  (tree *Tree, node *Node, elem_t element);
+node *insertLeftLeaf  (node *Node, elem_t element);
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 /// @brief Pushes element in left node of given subtree.
-/// @param Tree Pointer to tree.
 /// @param Node Pointer to node.
 /// @param element Element.
-node *pushRightLeaf (tree *Tree, node *Node, elem_t element);
+node *insertRightLeaf (node *Node, elem_t element);
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -62,11 +87,17 @@ node *treeInsert (tree *Tree, elem_t element);
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-/// @brief Pushes new leaf to subtree.
+/// @brief Pushes root to tree.
 /// @param Tree Pointer to tree.
-/// @param Node Pointer to node (subtree).
-/// @param element Element.
-node *pushLeafToNode (tree *Tree, node *Node, elem_t element);
+/// @param Root Pointer to root node.
+ISERROR pushRootToTree (tree *Tree, node *Root);
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+/// @brief Pushes new leaf to subtree.
+/// @param Node Pointer to current node.
+/// @param Leaf lPointer to leaf node (Leaf of current node).
+ISERROR pushLeafToNode (node *Node, node *Leaf);
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

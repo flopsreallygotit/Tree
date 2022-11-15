@@ -1,11 +1,95 @@
 #include <sys/stat.h>
-#include <malloc.h>
+#include <stdlib.h>
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-// TODO recursion read and add to tree
-
 #include "akinatorUtils.h"
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+// TODO Tree pushes.
+
+static node *nodeConstructor (wchar_t *Data, node *Parent)
+{
+    node *Node = (node *) calloc (1, sizeof(node));
+
+    CHECKERROR(Node != NULL && 
+               "Can't allocate memory for node.", 
+               NULL); 
+
+    Node->parent = Parent;
+    Node->left   = NULL;                                                   
+    Node->right  = NULL;
+
+    if (Data != NULL)
+    {
+        Node->data = (elem_t) calloc (wcslen(Data) + 1, sizeof(wchar_t));
+
+        CHECKERROR(Node->data != NULL &&
+                "Can't allocate memory for data of node.",
+                NULL);
+
+        wcscpy(Node->data, Data);
+    }
+
+    return Node;
+}
+
+static void subtreeDestructor (node *Node)
+{
+    node *leftSubtree  = Node->left;
+    node *rightSubtree = Node->right;
+
+    free(Node->data);
+    Node->data = NULL;
+
+    Node->left   = NULL;
+    Node->right  = NULL;
+    Node->parent = NULL;
+
+    free(Node);
+    Node = NULL;
+
+    if (leftSubtree  != NULL)
+        subtreeDestructor(leftSubtree);
+    
+    if (rightSubtree != NULL)
+        subtreeDestructor(rightSubtree);
+    
+    return;
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+static tree *treeConstructor (void)
+{
+    tree *Tree = (tree *) calloc (1, sizeof(tree));
+
+    CHECKERROR(Tree != NULL && 
+               "Can't allocate memory for tree.",
+               NULL);
+
+    Tree->root = nodeConstructor(NULL, NULL);
+
+    CHECKERROR(Tree->root != NULL, NULL);
+
+    return Tree;
+}
+
+void treeDestructor (tree *Tree)
+{
+    CHECKERROR(Tree != NULL && 
+               "Can't destruct nullpointer.",
+               (void) NULL);
+
+    if (Tree->root != NULL)
+        subtreeDestructor(Tree->root);
+
+    free(Tree);
+    Tree = NULL;
+
+    return;
+}
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -50,36 +134,56 @@ static void skipBadSymbols (FILE *file)
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+node* nodeReadFromFile (node *parentNode, size_t *nodeCount, FILE *file)
+{   
+    int firstSymbol = fgetc(file);
+    
+    if ((char) firstSymbol == '{')
+    {
+        wchar_t *element = NULL;
+
+        if (fscanf(file, "%ml[^{}]", &element) != 0)
+        {
+            node *currentNode = nodeConstructor(element, parentNode);
+
+            (*nodeCount)++;
+
+            int lastSymbol = fgetc(file);
+
+            // TODO subtree destructor.
+
+            if ((char) lastSymbol == '}')
+                goto freeAndReturn;
+            
+            ungetc(lastSymbol, file);
+
+            // Pushing to left  subtree.
+            pushLeafToNode(currentNode, nodeReadFromFile(currentNode, nodeCount, file));
+
+            // Pushing to right subtree.
+            pushLeafToNode(currentNode, nodeReadFromFile(currentNode, nodeCount, file));
+
+            CHECKERROR(fgetc(file) == '}' &&
+                       "Incorrect bracket sequence.",
+                       NULL);
+
+        freeAndReturn:
+            free(element);
+            element = NULL;
+            return currentNode;
+        }
+    }
+  
+    return NULL;
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 static ISERROR parseFile (tree *Tree, FILE *file)
 {
-    // First we need to initialize root of tree.
-    // Then we are parsing recursively.
+    size_t nodeCount = 0;
 
-    skipBadSymbols(file);
-
-    int symbol = getc(file);
-    if ((char) symbol != '{')
-    {
-        PUTERROR("Uncorrect bracket sequence.");
-
-        treeDestructor(Tree);
-        fclose(file);
-
-        return FILECONTENTERROR;
-    }
-
-    else if (symbol == EOF)
-    {
-        PUTERROR("Empty data base.");
-
-        treeDestructor(Tree);
-        fclose(file);
-
-        return EMPTY;
-    }
-
-    else
-        ungetc('{', file);
+    pushRootToTree(Tree, nodeReadFromFile(NULL, &nodeCount, file));
 
     fclose(file);
 
@@ -100,7 +204,7 @@ tree *openAndParseFile (const char *filename)
                "Can't open file.",
                NULL);
 
-    tree *Tree = treeConstructor;
+    tree *Tree = treeConstructor();
 
     CHECKERROR(Tree != NULL &&
                "Can't create tree.",

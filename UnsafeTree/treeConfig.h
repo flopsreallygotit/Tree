@@ -1,34 +1,55 @@
-#ifndef AKINATOR_UTILS_H
-#define AKINATOR_UTILS_H
+#ifndef TREE_CONFIG_H
+#define TREE_CONFIG_H
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#include <locale.h>
+#include <stddef.h>
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#include "akinatorConfig.h"
-#include "universalUtils.h"
-#include "../UnsafeTree/treeUtils.h" // TODO normal path to header.
+/// @brief Tree element type.
+
+#ifdef AKINATOR
+
+typedef wchar_t* elem_t;
+
+#else
+
+typedef wchar_t* elem_t;
+
+#endif
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-/// @brief Checks number of command line arguments and returns second (or NULL if it doesn't exist).
-/// @param argc Number of command line arguments.
-/// @param argv Content of command line arguments.
-const char *simpleCommandLineParser (const int argc, const char *argv[]);
+/// @brief Color of node filling in dump.
+static const char fillColor[] = "#9542F5";
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-/// @brief Open file depending on filename, parses it and puts values in tree.
-/// @param filename Name of file.
-tree *openAndParseFile (const char *filename);
+/// WARNING: Better don't change this value:
+
+/// @brief Max command size, that program can write in system.
+static const size_t maxCommandSize = 128;
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-/// @brief Destructs tree.
-/// @param Tree Pointer to tree.
-void treeDestructor (tree *Tree);
+/// @brief Node struct.
+typedef struct node
+{
+    node *parent;
+
+    node *left;
+
+    elem_t data;
+
+    node *right;
+}node;
+
+/// Tree struct.
+typedef struct tree
+{
+    node *root;
+}tree;
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

@@ -11,13 +11,13 @@ CXXFLAGS ?= -Wall -Wextra
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Configure directory flags.
-DIRFLAGS = -I../Tree -I../Universal
+DIRFLAGS = -I../UnsafeTree -I../Universal
 
 # Configure sources you need to compile.
-SOURCES = main.cpp akinatorUtils.cpp ../Tree/treeUtils.cpp ../Universal/universalUtils.cpp
+SOURCES = main.cpp akinatorUtils.cpp ../UnsafeTree/treeUtils.cpp ../Universal/universalUtils.cpp
 
 # Configure dependence headers.
-HEADERS = akinatorConfig.h akinatorUtils.h ../Tree/treeUtils.h ../Universal/universalUtils.h
+HEADERS = akinatorConfig.h akinatorUtils.h ../UnsafeTree/treeUtils.h ../Universal/universalUtils.h
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

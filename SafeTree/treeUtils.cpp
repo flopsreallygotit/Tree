@@ -1,5 +1,4 @@
 #include <stdlib.h>
-#include <locale.h>
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -51,11 +50,13 @@ static ISERROR treeVerifier (const tree *Tree)
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-static node *nodeConstructor (elem_t element, node *parent)
+node *nodeConstructor (elem_t element, node *parent)
 {                                          
     node *Node = (node *) calloc (1, sizeof(node));
 
-    CHECKERROR(Node != NULL && "Can't allocate memory for node.", NULL); 
+    CHECKERROR(Node != NULL && 
+               "Can't allocate memory for node.", 
+               NULL); 
 
     Node->parent = parent;
     Node->data   = element;
@@ -103,6 +104,10 @@ static void recursiveTreeDestroyer (node *Node)
     if (Node->right != NULL)
         recursiveTreeDestroyer(Node->right);
 
+    Node->parent = NULL;
+    Node->left   = NULL;
+    Node->right  = NULL;
+
     free(Node);
     Node = NULL;
 
@@ -136,7 +141,47 @@ node *treeRoot (tree *Tree)
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-node *treeRootPush (tree *Tree, elem_t element) 
+node *nodeParent (node *Node)
+{
+    CHECKERROR(Node != NULL &&
+               "Can't execute parent node of nullpointer.", 
+               NULL);
+
+    return Node->parent;
+}
+
+node *leftNode (node *Node)
+{
+    CHECKERROR(Node != NULL &&
+               "Can't execute left node of nullpointer.", 
+               NULL);
+
+    return Node->left;
+}
+
+node *rightNode (node *Node)
+{
+    CHECKERROR(Node != NULL &&
+               "Can't execute right node of nullpointer.", 
+               NULL);
+
+    return Node->right;
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+elem_t nodeData (node *Node)
+{
+    CHECKERROR(Node != NULL &&
+               "Can't execute data of nullpointer.", 
+               NULL);
+
+    return Node->data;
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+node *insertRoot (tree *Tree, elem_t element) 
 {
     CHECKERROR(Tree != NULL &&
                "Can't push to nullpointer.", 
@@ -156,16 +201,8 @@ node *treeRootPush (tree *Tree, elem_t element)
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-node *pushLeftLeaf (tree *Tree, node *Node, elem_t element)
+node *insertLeftLeaf (node *Node, elem_t element)
 {
-    CHECKERROR(Tree != NULL &&
-               "Can't push to nullpointer.", 
-               NULL);
-
-    CHECKERROR(treeVerifier(Tree) == NOTERROR &&
-               "Tree is wrong.",
-               NULL);
-
     CHECKERROR(Node->left == NULL &&
                "Can't push a value in left node, because it already contains it.",
                NULL);
@@ -177,16 +214,8 @@ node *pushLeftLeaf (tree *Tree, node *Node, elem_t element)
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-node *pushRightLeaf (tree *Tree, node *Node, elem_t element)
+node *insertRightLeaf (node *Node, elem_t element)
 {
-    CHECKERROR(Tree != NULL &&
-               "Can't push to nullpointer.", 
-               NULL);
-
-    CHECKERROR(treeVerifier(Tree) == NOTERROR &&
-               "Tree is wrong.",
-               NULL);
-
     CHECKERROR(Node->right == NULL &&
                "Can't push a value in right node, because it already contains it.",
                NULL);
@@ -263,25 +292,67 @@ node *treeInsert (tree *Tree, elem_t element)
                NULL);
 
     CHECKERROR(treeVerifier(Tree) == NOTERROR &&
-            "Tree is wrong.",
-            NULL);
+               "Tree is wrong.",
+               NULL);
 
     return recursiveTreePusher(Tree->root, element);
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-node *pushLeafToNode (tree *Tree, node *Node, elem_t element)
+ISERROR pushRootToTree (tree *Tree, node *Root)
+{
+    CHECKERROR(Tree != NULL && 
+               "You are trying to push in nullpointer.", 
+               NULLPOINTER);
+
+    CHECKERROR(Root != NULL &&
+               "You can't initialize root pointer as NULL.",
+               NULLPOINTER);
+
+    CHECKERROR(treeVerifier(Tree) == NOTERROR &&
+               "Tree is wrong.",
+               NULLPOINTER);
+
+    node *leftSubtree  = Tree->root->left;
+    node *rightSubtree = Tree->root->right;
+
+    free(Tree->root);
+    Tree->root = Root;
+
+    if (leftSubtree  != NULL)
+        leftSubtree->parent  = Root;
+        
+    if (rightSubtree != NULL)
+        rightSubtree->parent = Root;
+
+    return NOTERROR;
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ISERROR pushLeafToNode (node *Node, node *Leaf)
 {
     CHECKERROR(Node != NULL && 
                "You are trying to push in nullpointer.", 
-               NULL);
+               NULLPOINTER);
 
-    CHECKERROR(treeVerifier(Tree) == NOTERROR &&
-        "Tree is wrong.",
-        NULL);
+    CHECKERROR(Leaf != NULL && 
+               "You are trying to push in nullpointer.", 
+               NULLPOINTER);
 
-    return recursiveTreePusher(Node, element);
+    if (Node->left == NULL)
+        Node->left  = Leaf;
+
+    else if (Node->right == NULL)
+        Node->right = Leaf;
+    
+    else
+        CHECKERROR(NULL &&
+                   "Both nodes aren't NULL. Can't push.",
+                   ERROR);
+
+    return NOTERROR;    
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -293,41 +364,9 @@ node *pushLeafToNode (tree *Tree, node *Node, elem_t element)
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-static void elementOutput (const int element,     FILE *file)
-{
-    fprintf(file, "%d", element);
-
-    return;
-}
-
-static void elementOutput (const double element,  FILE *file)
-{
-    fprintf(file, "%lg", element);
-
-    return;
-}
-
-static void elementOutput (const char *element,   FILE *file)
-{
-    printf("\tHERE\n");
-    if (element != NULL)
-        fprintf(file, "\"%s\"", element);
-    else
-        fprintf(file, "%s", element); // Seems strange, but i need (nil) in file, instead of "(nil)".
-
-    return;
-}
-
 static void elementOutput (const char element,    FILE *file) 
 {
     fprintf(file, "%c", element);
-
-    return;
-}
-
-static void elementOutput (const long element,    FILE *file)
-{
-    fprintf(file, "%ld", element);
 
     return;
 }
@@ -339,12 +378,25 @@ static void elementOutput (const short element,   FILE *file)
     return;
 }
 
-static void elementOutput (const wchar_t *element, FILE *file) 
+static void elementOutput (const int element,     FILE *file)
 {
-    if (element != NULL)
-        fprintf(file, "\"%ls\"", element);
-    else
-        fprintf(file, "%ls", element); // Seems strange, but i need (nil) in file, instead of "(nil)".
+    fprintf(file, "%d", element);
+
+    return;
+}
+
+static void elementOutput (const long element,    FILE *file)
+{
+    fprintf(file, "%ld", element);
+
+    return;
+}
+
+static void elementOutput (const double element,  FILE *file)
+{
+    fprintf(file, "%lg", element);
+
+    return;
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -548,6 +600,7 @@ static void fillTemporaryFile (const tree *Tree, FILE *tmp)
 // Html output need sources of images.
 // => We need to save all dump images.
 // => We need a number of current image:
+
 static int dumpNumber = 0;
 
 static ISERROR makeSourcesImages(void)
@@ -574,8 +627,6 @@ ISERROR treeDumpFunction (const tree *Tree,     const char *message,
                           const int   line,     const char *function, 
                           FILE *file)
 {
-    setlocale(LC_CTYPE, "");
-
     CHECKERROR(Tree     != NULL && 
                "Can't dump nullpointer.", 
                NULLPOINTER);

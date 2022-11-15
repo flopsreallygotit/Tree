@@ -6,18 +6,18 @@
 CXX = g++
 
 # Configure compile flags.
-CXXFLAGS ?= -w # -Wall -Wextra
+CXXFLAGS ?= -w
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Configure directory flags.
-DIRFLAGS = -I../Tree -I../Universal
+DIRFLAGS = -I../SafeTree -I../Universal
 
 # Configure sources you need to compile.
-SOURCES = main.cpp ../Tree/treeUtils.cpp ../Universal/universalUtils.cpp
+SOURCES = ../Universal/universalUtils.cpp ../SafeTree/treeUtils.cpp main.cpp
 
 # Configure dependence headers.
-HEADERS = ../Tree/treeUtils.h ../Universal/universalUtils.h
+HEADERS = ../Universal/universalUtils.h ../SafeTree/treeUtils.h
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
