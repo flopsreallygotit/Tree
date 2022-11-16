@@ -1,4 +1,3 @@
-#include <sys/stat.h>
 #include <stdlib.h>
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -168,27 +167,6 @@ const char *simpleCommandLineParser (const int argc, const char *argv[])
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-// static void skipBadSymbols (FILE *file)
-// {
-//     // We don't need to skip bad symbols if syntax is strict.
-//     if (strictBaseSyntax)
-//         return;
-
-//     int symbol = getc(file);
-//     while (symbol != '{' && symbol != '"' && 
-//            symbol != '}' && symbol != EOF)
-//         symbol = getc(file);
-
-//     ungetc(symbol, file); 
-    
-//     // For example: we skipped all bad symbols, but last symbol from stream is '{', '}', '"'.
-//     // So we need to put it back to stream.
-
-//     return;
-// }
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 node* nodeReadFromFile (node *parentNode, FILE *file)
 {   
     int firstSymbol = fgetc(file);
@@ -321,38 +299,43 @@ static void endGame (node *Node, bool answer)
 {
     if (answer)
     {
+        SPEAK("Легчайшая для величайшего");
         printf("База. Я опять выиграл!\n");
 
         return;
     }
     
     else
-    {   //TODO tts, definition, compare.     
-        wchar_t *compareSign = (wchar_t *) calloc (maxUserDataLength, sizeof(wchar_t));
+    {    
+        wchar_t *compareSign = NULL;
 
-        CHECKERROR(compareSign != NULL && 
-                   "Can't allocate memory for compare sign.", 
-                   (void) NULL);
+        // CHECKERROR(compareSign != NULL && 
+        //            "Can't allocate memory for compare sign.", 
+        //            (void) NULL);
 
-        wchar_t *Answer      = (wchar_t *) calloc (maxUserDataLength, sizeof(wchar_t));
+        wchar_t *Answer      = NULL;
 
-        CHECKERROR(Answer != NULL && 
-                   "Can't allocate memory for answer.", 
-                   (void) NULL);
+        // CHECKERROR(Answer != NULL && 
+        //            "Can't allocate memory for answer.", 
+        //            (void) NULL);
 
-        printf("О, нет!!! Жалкий человечишка одолел меня!\nТак что же ты загадал? ");
-        scanf("%l[^\n]s", Answer);
+        SPEAK("О нет Жалкий человечишка одолел меня");
+        printf("Так, что же ты загадал? ");
+        scanf("%ml[^\n]s", &Answer);
 
         // Reading \n from stream.
         getchar();
 
+        SPEAK("В чём различие");
         printf("Чем оно отличается от \"%ls\"? ", Node->data);
-        scanf("%l[^\n]s", compareSign);
+        scanf("%ml[^\n]s", &compareSign);
 
         // Reading \n from stream.
         getchar();
         
         createSubtreeOnLeaf(Node, Answer, Node->data, compareSign);
+
+        SPEAK("Я вернусь и стану лучше АХАХАХАХАХА");
 
         free(compareSign);
         free(Answer);
@@ -378,6 +361,7 @@ static bool getAnswer(void)
     if (answer == L'н' || answer == L'Н')
         return false;
     
+    SPEAK("Еблан, введи ответ нормально");
     printf("Неправильный ввод!\n[(Д)а\\(Н)ет]: ");
 
     return getAnswer();
@@ -409,10 +393,14 @@ ISERROR startGame (tree *Tree)
                "Can't start game without tree.",
                NULLPOINTER);
 
+    SPEAK("Да начнётся же игра. АХАХАХАХАХАХ");
+
     recursiveGame(Tree->root);
 
     return NOTERROR;
 }
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ISERROR changeDataBase (tree *Tree, const char *filename)
 {

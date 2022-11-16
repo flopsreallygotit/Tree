@@ -9,7 +9,7 @@ int main (const int argc, const char *argv[])
     const char *filename = simpleCommandLineParser(argc, argv);
 
     CHECKERROR(filename != NULL &&
-               "Error in filenameparsing", 
+               "Error in filename parsing.", 
                -1);
 
     tree *Tree = openAndParseFile(filename);

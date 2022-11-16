@@ -9,7 +9,14 @@
 
 #include "akinatorConfig.h"
 #include "universalUtils.h"
-#include "../UnsafeTree/treeUtils.h" // TODO normal path to header.
+#include "treeUtils.h"
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+/// @brief Outputs text to speech on russian.
+#define SPEAK(text)          \
+    if (enableAkinatorVoice) \
+        system("festival -b '(begin (voice_msu_ru_nsh_clunits) (SayText " #text "))'")
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
