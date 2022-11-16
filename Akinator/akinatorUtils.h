@@ -26,6 +26,19 @@ tree *openAndParseFile (const char *filename);
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+/// @brief Starts akinator game.
+/// @param Tree Pointer to tree.
+ISERROR startGame (tree *Tree);
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+/// @brief Changes data base in file.
+/// @param filename Name of file.
+/// @param Tree Pointer to tree.
+ISERROR changeDataBase (tree *Tree, const char *filename);
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 /// @brief Destructs tree.
 /// @param Tree Pointer to tree.
 void treeDestructor (tree *Tree);

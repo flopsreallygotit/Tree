@@ -46,14 +46,14 @@ static void elementOutput (const double element,   FILE *file)
 
 static void elementOutput (const wchar_t *element, FILE *file)
 {
-    fwprintf(file, element);
+    fprintf(file, "\"%ls\"", element);
 
     return;
 }
 
 static void elementOutput (const char *element,    FILE *file)
 {
-    fprintf(file, element);
+    fprintf(file, "\"%s\"", element);
 
     return;
 }

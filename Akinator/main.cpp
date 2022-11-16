@@ -5,7 +5,6 @@
 int main (const int argc, const char *argv[])
 {
     setlocale(LC_CTYPE, "");
-    setvbuf(stdout, NULL, _IONBF, 0);
 
     const char *filename = simpleCommandLineParser(argc, argv);
 
@@ -19,9 +18,19 @@ int main (const int argc, const char *argv[])
                "Error in file parsing.", 
                -1);
 
-    preorderPrintTree(Tree);
+
+    FILE *file = fopen("output.htm", "w");
+
+    treeDump(Tree, "Dump before changes.", file);
+
+    startGame(Tree);
+
+    changeDataBase(Tree, filename);
+    
+    treeDump(Tree, "Dump after changes.", file);
 
     treeDestructor(Tree);
+    fclose(file);
 
     return 0;
 }
